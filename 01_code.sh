@@ -1,3 +1,4 @@
+#!/bin/bash
 
 part_1() {
   first_file="$(mktemp)"
