@@ -1,0 +1,9 @@
+#!/bin/bash
+
+day="$1"
+part="$2"
+input="$3"
+
+source "${day}_code.sh"
+
+part_"$part" "$input"

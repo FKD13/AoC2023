@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if ! command -v bash > /dev/null; then
+  echo 'missing bash' 
+fi

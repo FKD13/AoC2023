@@ -63,7 +63,3 @@ part_2() {
   
   rm "$first_file" "$last_file"
 }
-
-echo "Part 1: $(part_1)"
-
-echo "Part 2: $(part_2)"
