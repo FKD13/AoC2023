@@ -2,66 +2,42 @@
 
 part_1() {
 
-	declare -A limits
-
-	limits[red]=12
-	limits[green]=13
-	limits[blue]=14
-
 	sum=0
+	i=1
+
+	max_values="$((
+		sed 's/;/,/g' | 
+		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green)),?/\2 \1\nGame \1:/g;ta' | 
+		sed '/Game/d' | 
+		sort -k3n -k2 -k1nr | 
+		uniq -f1 | 
+		cut -f 1 -d ' ' | 
+		pr -a3 -s' ' -t -T
+	) < 02_input.txt)"
 	
-	while read -r game; do
+	while read -r blue green red; do
 
-		declare -A max_color
-		
-		game_id="$(sed -E 's/^Game ([0-9]+):.*$/\1/' <<< "$game")"
-		games="$(echo "$game" | sed -E 's/^.*: (.*)$/\1/' | sed -E 's/(,|;) /\n/g')"
-		
-		while read -r count color; do
-			if [[ "${max_color["$color"]}" -lt "$count" ]]; then
-				max_color["$color"]="$count"
-			fi
-		done <<< "$games"
-
-		fail="false"
-
-		for key in "${!max_color[@]}"; do
-			if [[ "${max_color["$key"]}" -gt "${limits["$key"]}" ]]; then
-				fail="true"
-			fi
-		done
-
-		if [[ "$fail" == "false" ]]; then
-			sum+="+$game_id"
+		if [[ "$blue" -le 14 && "$green" -le 13 && "$red" -le 12 ]]; then
+			sum+="+$i"
 		fi
 
-		unset max_color
+		i=$((i+1))
 		
-	done < 02_input.txt
+	done <<< "$max_values"
 
 	bc <<< "$sum"
 }
 
 part_2() {
-
-	sum=0
-	
-	while read -r game; do
-		declare -A max_color
-		
-		game_id="$(sed -E 's/^Game ([0-9]+):.*$/\1/' <<< "$game")"
-		games="$(echo "$game" | sed -E 's/^.*: (.*)$/\1/' | sed -E 's/(,|;) /\n/g')"
-		
-		while read -r count color; do
-			if [[ "${max_color["$color"]}" -lt "$count" ]]; then
-				max_color["$color"]="$count"
-			fi
-		done <<< "$games"
-		
-		sum+="+(${max_color[red]}*${max_color[green]}*${max_color[blue]})"
-		
-		unset max_color
-	done < 02_input.txt
-
-	bc <<< "$sum"
+	(
+		sed 's/;/,/g' | 
+		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green)),?/\2 \1\nGame \1:/g;ta' | 
+		sed '/Game/d' | 
+		sort -k3n -k2 -k1nr | 
+		uniq -f1 | 
+		cut -f 1 -d ' ' | 
+		pr -a3 -s'*' -t -T | 
+		paste -sd '+' | 
+		bc
+	) < 02_input.txt
 }
