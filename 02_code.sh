@@ -6,8 +6,7 @@ part_1() {
 	i=1
 
 	max_values="$((
-		sed 's/;/,/g' | 
-		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green)),?/\2 \1\nGame \1:/g;ta' | 
+		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green))(,|;)?/\2 \1\nGame \1:/g;ta' | 
 		sed '/Game/d' | 
 		sort -k3n -k2 -k1nr | 
 		uniq -f1 | 
@@ -30,8 +29,7 @@ part_1() {
 
 part_2() {
 	(
-		sed 's/;/,/g' | 
-		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green)),?/\2 \1\nGame \1:/g;ta' | 
+		sed -E ':a;s/Game ([0-9]+): ([0-9]+ (blue|red|green))(,|;)?/\2 \1\nGame \1:/g;ta' | 
 		sed '/Game/d' | 
 		sort -k3n -k2 -k1nr | 
 		uniq -f1 | 
