@@ -35,6 +35,5 @@ part_2() {
       card_count["$j"]=$((card_count[j]+card_count[i]))
     done
   done
-  
   bc <<< "$sum"
 }
