@@ -1,33 +1,31 @@
 #!/bin/bash
 
 part_1() {
-  input="$((sed -E 's/^[a-zA-Z]+: //;s/ +/ /g' | tr '\n' '-') < 06_input.txt)"
+  input="$(< 06_input.txt)"
 
-  [[ "$input" =~ ([^-]+)-([^-]+) ]]
-  IFS=' ' read -ra times <<< "${BASH_REMATCH[1]}"
-  IFS=' ' read -ra dists <<< "${BASH_REMATCH[2]}"
+  [[ "${input//$'\n'/-}" =~ ([^-]+)-([^-]+) ]]
+  IFS=' ' read -ra times <<< "${BASH_REMATCH[1]#*:}"
+  IFS=' ' read -ra dists <<< "${BASH_REMATCH[2]#*:}"
 
+  lines=
   for ((i = 0; i < "${#times[@]}"; i++)); do
-    echo "scale=5;(-${times[i]}-sqrt(${times[i]}^2-4*-1*-${dists[i]}))/(2*-1)-(-${times[i]}+sqrt(${times[i]}^2-4*-1*-${dists[i]}))/(2*-1)" 
-  done |
-  bc |
+    lines+="scale=5;(-${times[i]}-sqrt(${times[i]}^2-4*-1*-${dists[i]}))/(2*-1)-(-${times[i]}+sqrt(${times[i]}^2-4*-1*-${dists[i]}))/(2*-1)"
+    lines+=$'\n' 
+  done 
+  
+  bc <<< "$lines" |
   xargs printf "%.0f\n" |
   paste -sd'*' |
   bc
 }
 
 part_2() {
-  input="$((sed -E 's/^[a-zA-Z]+: //;s/ +//g' | tr '\n' '-') < 06_input.txt)"
+  input="$(< 06_input.txt)"
 
-  [[ "$input" =~ ([^-]+)-([^-]+) ]]
-  time="${BASH_REMATCH[1]}"
-  dist="${BASH_REMATCH[2]}"
+  [[ "${input//$'\n'/-}" =~ ([^-]+)-([^-]+) ]]
+  ttime="${BASH_REMATCH[1]// /}"; time="${ttime#*:}"
+  tdist="${BASH_REMATCH[2]// /}"; dist="${tdist#*:}"
 
-  echo "scale=5;(-${time}-sqrt(${time}^2-4*-1*-${dist}))/(2*-1)-(-${time}+sqrt(${time}^2-4*-1*-${dist}))/(2*-1)" |
-  bc |
-  xargs printf "%.0f\n" |
-  paste -sd'*' |
-  bc
-  
+  bc <<< "scale=1;(-${time}-sqrt(${time}^2-4*-1*-${dist}))/(2*-1)-(-${time}+sqrt(${time}^2-4*-1*-${dist}))/(2*-1)"
   echo "-> Please ceil ◔_◔ <-"
 }
