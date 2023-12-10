@@ -31,16 +31,7 @@ part_1() {
   echo "$steps"
 }
 
-get_cache() {
-  eval "echo \${cache_z_${1}[$2]}"
-}
-
-set_cache() {
-  eval "cache_z_${1}[$2]=$3"
-}
-
 part_2() {
-  # Giving up on this part for now
   input="$(< 08_input.txt)"
 
   command="${input//$'\n'*}"
@@ -51,81 +42,30 @@ part_2() {
     mapping["$key"]="$left-$right"
   done <<< "$(tail -n +3 <<< "$input" | sed -E 's/^(...) = \((...), (...)\)$/\1 \2 \3/')"
 
-  declare -A cache
-  
+  answer="1"
+
   for key in "${!mapping[@]}"; do
-    if [[ "$key" =~ ..A ]]; then
-      cache["$key"]="0-$key"
+    if [[ ! "$key" =~ ..A ]]; then
+      continue
     fi
 
-    declare -a "cache_z_$key"
-    for ((i = 0; i < "$command_length"; i++)); do
-      set_cache "$key" "$i" -1
-    done
-  done
+    steps=0
+    current="$key"
   
-  max_steps=0
-  max_key=
-
-  while true; do
-    update=0
-    for key in "${!cache[@]}"; do
-      if [[ "$key" == "$max_key" ]]; then
-        break
-      fi
-
-      steps="${cache["$key"]%-*}"
-      current="${cache["$key"]#*-}"
-
-     # set -x
-      current_cache="$(get_cache "$key" "$((steps % command_length))")"
-
-      while [[ "$current_cache" != "-1" && "$steps" -lt "$max_steps" ]]; do
-        increment="${current_cache%-*}"
-        current="${current_cache#*-}"
-        ((steps += increment))
-        current_cache="$(get_cache "$current" "$((steps % command_length))")"
-      done
-     # set +x
-
-      og_steps="$steps"
-      og_current="$current"
-      
-      while [[ "$steps" -lt "$max_steps" || ! "$current" =~ ..Z ]]; do
-        step="${command:((steps % command_length)):1}"
+    while [[ "${current:2:1}" != Z ]]; do
+      step="${command:((steps % command_length)):1}"
     
-        current="${mapping["$current"]}"
-        if [[ "$step" == L ]]; then
-          current="${current%-*}"
-        else
-          current="${current#*-}"
-        fi
+      current="${mapping["$current"]}"
+      if [[ "$step" == L ]]; then
+        current="${current%-*}"
+      else
+        current="${current#*-}"
+      fi
         
-        ((steps++))
-      done
-
-      # set -x
-      cache["$key"]="$((steps))-$current"
-      if [[ "$steps" != "$og_steps" ]]; then
-        set_cache "$og_current" "$((og_steps % command_length))" "$((steps - og_steps))-$current"
-        if [[ "$og_current" == "$current" ]]; then
-          echo "Recursion: $((steps - (steps - og_steps))) steps; recusion step: $((steps - og_steps))"
-        fi
-        update=1
-      fi
-      # set +x
-
-      if [[ "$steps" -gt "$max_steps" ]]; then
-        max_steps="$steps"
-        max_key="$key"
-        # echo "-> max is now $max_steps for key $key"
-      fi
+      ((steps++))
     done
-    echo "${cache[@]}"
 
-    if [[ $update == 0 ]]; then
-      exit 0
-    fi
+    answer="lcm($answer, $steps)"
   done
-  echo "$((max_steps))"
+  qalc -t "$answer"
 }
